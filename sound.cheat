@@ -1,0 +1,38 @@
+% sound
+
+# Switch sound output
+pacmd set-default-sink <get_output>
+(speaker-test -t wav -c 1) & pid=$! ; sleep 0.5s ; kill -9 $pid
+
+# Switch sound input
+pacmd set-default-source <get_input>
+arecord -vv -f dat /dev/null
+
+# Headset Plantronics BeatPro - Music
+index=`pacmd list-cards | grep bluez_card -B1 | grep index | awk '{print $2}'`
+pacmd set-card-profile $index a2dp_sink
+pacmd set-default-sink bluez_sink.0C_E0_E4_FA_F2_80.a2dp_sink
+(speaker-test -t wav -c 1) & pid=$! ; sleep 0.5s ; kill -9 $pid
+
+# Headset Plantronics BeatPro - Call
+index=`pacmd list-cards | grep bluez_card -B1 | grep index | awk '{print $2}'`
+pacmd set-card-profile $index headset_head_unit
+pacmd set-default-sink bluez_sink.0C_E0_E4_FA_F2_80.headset_head_unit
+pacmd set-default-source bluez_source.0C_E0_E4_FA_F2_80.headset_head_uni
+(speaker-test -t wav -c 1) & pid=$! ; sleep 0.5s ; kill -9 $pid
+
+# Laptop sound
+pacmd set-default-sink alsa_output.pci-0000_00_1f.3.analog-stereo
+pacmd set-default-source alsa_input.pci-0000_00_1f.3.analog-stereo
+(speaker-test -t wav -c 1) & pid=$! ; sleep 0.5s ; kill -9 $pid
+
+# Get sound output list
+pactl list short sinks |  cut --fields=1,2
+
+# Get sound input list
+pactl list short sources |  cut --fields=1,2 | grep -e 'input' -e 'source'
+
+$ get_sound_output: pactl list short sinks |  cut --fields=1,2
+$ get_output: echo "<get_sound_output>" | cut -f2
+$ get_sound_input: pactl list short sources |  cut --fields=1,2 | grep -e 'input' -e 'source'
+$ get_input: echo "<get_sound_input>" | cut -f2
